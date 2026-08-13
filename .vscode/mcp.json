@@ -1,9 +1,0 @@
-{
-	"servers": {
-		"MCP server": {
-			"url": "https://docs.trading212.com/mcp",
-			"type": "http"
-		}
-	},
-	"inputs": []
-}
