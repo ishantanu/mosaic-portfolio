@@ -1,9 +1,6 @@
 # Mosaic
 
-Mosaic gives you one clear view of a fragmented investment portfolio. It brings
-holdings, cash, performance, costs, ISA allowance use, sector exposure, ETF
-look-through exposure and portfolio-health signals into a single responsive
-dashboard.
+Mosaic gives you one clear view of your Stocks & Shares ISAs. It brings holdings, cash, performance, costs, ISA allowance use, sector exposure, ETF look-through exposure and portfolio-health signals into a single responsive dashboard.
 
 Mosaic is an independent portfolio analytics tool. It is not a broker, does not
 hold client money or assets, cannot place trades, and does not provide personal
