@@ -1,0 +1,9 @@
+title = "Mosaic Gitleaks configuration"
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+  [[rules.allowlists]]
+  description = "Empty API-key placeholder in the public environment template"
+  paths = ['''^\.env\.example$''']
