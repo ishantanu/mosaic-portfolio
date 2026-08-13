@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mosaic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mosaic_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-mosaic}
+    volumes:
+      - mosaic_postgres:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      PORT: "8081"
+      CORS_ORIGIN: http://localhost:${WEB_PORT:-8081}
+      TRADING212_API_KEY: ${TRADING212_API_KEY:-}
+      TRADING212_SECRET_KEY: ${TRADING212_SECRET_KEY:-}
+      TRADING212_ACCOUNT_ID: ${TRADING212_ACCOUNT_ID:-demo-account}
+      MOSAIC_DEMO_MODE: ${MOSAIC_DEMO_MODE:-false}
+      DATABASE_URL: ${DATABASE_URL:-postgres://mosaic:mosaic_dev_only@postgres:5432/mosaic?sslmode=disable}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-mosaic-api}
+      OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-1}
+    expose:
+      - "8081"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8081}:80"
+
+volumes:
+  mosaic_postgres:

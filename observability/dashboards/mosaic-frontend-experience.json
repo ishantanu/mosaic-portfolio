@@ -1,0 +1,75 @@
+{
+  "uid": "mosaic-frontend-experience",
+  "title": "Mosaic · Frontend Experience",
+  "tags": ["mosaic", "frontend", "faro", "web-vitals"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "links": [{"title": "Service health", "type": "link", "url": "/d/mosaic-observability", "tooltip": "Return to backend service health", "icon": "external link"}],
+  "time": {"from": "now-6h", "to": "now"},
+  "annotations": {"list": []},
+  "panels": [
+    {"id": 1, "type": "row", "title": "Core Web Vitals", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}},
+    {
+      "id": 2, "type": "stat", "title": "Average LCP", "description": "Average Largest Contentful Paint over the selected time range. Good is ≤2.5 seconds.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_lcp != \"\" | unwrap value_lcp [$__range]))", "queryType": "range"}],
+      "fieldConfig": {"defaults": {"unit": "ms", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 2500}, {"color": "red", "value": 4000}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "background_solid", "graphMode": "none"}, "gridPos": {"h": 5, "w": 6, "x": 0, "y": 1}
+    },
+    {
+      "id": 3, "type": "stat", "title": "Average CLS", "description": "Average Cumulative Layout Shift over the selected time range. Good is ≤0.10.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_cls != \"\" | unwrap value_cls [$__range]))", "queryType": "range"}],
+      "fieldConfig": {"defaults": {"decimals": 3, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 0.1}, {"color": "red", "value": 0.25}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "background_solid", "graphMode": "none"}, "gridPos": {"h": 5, "w": 6, "x": 6, "y": 1}
+    },
+    {
+      "id": 4, "type": "stat", "title": "Average FCP", "description": "Average First Contentful Paint over the selected time range. Good is ≤1.8 seconds.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_fcp != \"\" | unwrap value_fcp [$__range]))", "queryType": "range"}],
+      "fieldConfig": {"defaults": {"unit": "ms", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1800}, {"color": "red", "value": 3000}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "background_solid", "graphMode": "none"}, "gridPos": {"h": 5, "w": 6, "x": 12, "y": 1}
+    },
+    {
+      "id": 5, "type": "stat", "title": "Average TTFB", "description": "Average Time to First Byte over the selected time range.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_ttfb != \"\" | unwrap value_ttfb [$__range]))", "queryType": "range"}],
+      "fieldConfig": {"defaults": {"unit": "ms", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 800}, {"color": "red", "value": 1800}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "background_solid", "graphMode": "none"}, "gridPos": {"h": 5, "w": 6, "x": 18, "y": 1}
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Web Vitals over time", "description": "Raw Faro Web Vitals, parsed from browser telemetry in Loki.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [
+        {"refId": "A", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_lcp != \"\" | unwrap value_lcp [$__interval]))", "legendFormat": "LCP"},
+        {"refId": "B", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_fcp != \"\" | unwrap value_fcp [$__interval]))", "legendFormat": "FCP"},
+        {"refId": "C", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_ttfb != \"\" | unwrap value_ttfb [$__interval]))", "legendFormat": "TTFB"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ms", "custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 12, "lineWidth": 2, "showPoints": "always"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}}, "gridPos": {"h": 9, "w": 16, "x": 0, "y": 6}
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Layout stability", "description": "CLS values from Faro; lower is better.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "avg(avg_over_time({source=\"faro\"} | logfmt | kind=\"measurement\" | type=\"web-vitals\" | value_cls != \"\" | unwrap value_cls [$__interval]))", "legendFormat": "CLS"}],
+      "fieldConfig": {"defaults": {"decimals": 3, "custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 12, "lineWidth": 2, "showPoints": "always"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 0.1}, {"color": "red", "value": 0.25}]}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}}, "gridPos": {"h": 9, "w": 8, "x": 16, "y": 6}
+    },
+    {"id": 8, "type": "row", "title": "Browser API experience", "gridPos": {"h": 1, "w": 24, "x": 0, "y": 15}},
+    {
+      "id": 9, "type": "timeseries", "title": "P95 frontend API duration", "description": "Browser-observed fetch duration for Mosaic API calls.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "quantile_over_time(0.95, {source=\"faro\"} | logfmt | event_name=\"faro.performance.resource\" | event_data_initiatorType=\"fetch\" | event_data_duration != \"\" | unwrap event_data_duration [$__interval])", "legendFormat": "P95 fetch duration"}],
+      "fieldConfig": {"defaults": {"unit": "ms", "custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 12, "lineWidth": 2, "showPoints": "always"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}}, "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+    },
+    {
+      "id": 10, "type": "logs", "title": "Browser errors and slow API calls", "description": "Faro logs include traceID/spanID for fetch events; use them to investigate user-visible failures alongside Tempo.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "{source=\"faro\"} | logfmt | event_name=~\"faro.tracing.fetch|faro.performance.resource\"", "queryType": "range"}],
+      "options": {"showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "dedupStrategy": "none", "sortOrder": "Descending", "enableLogDetails": true}, "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+    }
+  ]
+}

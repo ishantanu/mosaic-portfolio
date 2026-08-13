@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1.7
+FROM golang:1.26-alpine AS build
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+
+COPY cmd ./cmd
+COPY internal ./internal
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/mosaic-api ./cmd/api
+
+FROM alpine:3.21
+RUN apk add --no-cache ca-certificates && addgroup -S mosaic && adduser -S -G mosaic mosaic
+COPY --from=build /out/mosaic-api /usr/local/bin/mosaic-api
+
+USER mosaic
+EXPOSE 8081
+ENV PORT=8081
+ENTRYPOINT ["/usr/local/bin/mosaic-api", "serve"]

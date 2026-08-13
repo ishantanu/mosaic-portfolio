@@ -1,0 +1,9 @@
+.git
+.DS_Store
+.pnpm-store
+data/portfolio-history.json
+.nvm
+frontend/node_modules
+frontend/dist
+tmp
+docs

@@ -1,0 +1,21 @@
+{
+  "name": "mosaic-web",
+  "private": true,
+  "packageManager": "npm@12.0.2",
+  "engines": {
+    "node": ">=24.19.0 <25",
+    "npm": ">=11.0.0 <13"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.1.0"
+  },
+  "dependencies": {
+    "@grafana/faro-web-sdk": "^2.9.0",
+    "@grafana/faro-web-tracing": "^2.9.0"
+  }
+}

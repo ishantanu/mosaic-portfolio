@@ -1,0 +1,106 @@
+faro.receiver "mosaic" {
+  extra_log_labels = {source = "faro"}
+  server {
+    listen_address       = "0.0.0.0"
+    listen_port          = 12347
+    cors_allowed_origins = ["http://localhost:8081", "http://localhost:5173"]
+  }
+  output {
+    logs   = [loki.write.mosaic.receiver]
+    traces = [otelcol.processor.batch.mosaic.input]
+  }
+}
+
+// Local Compose only: capture structured container logs so Tempo trace IDs can
+// be correlated with the API's JSON request logs in Loki.
+discovery.docker "local" {
+  host = "unix:///var/run/docker.sock"
+}
+
+loki.source.docker "local" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.local.targets
+  labels     = {source = "docker", stack = "mosaic"}
+  forward_to = [loki.process.docker.receiver]
+}
+
+// Avoid an initial Docker history replay violating Loki's out-of-order window.
+// Alloy retains positions under /var/lib/alloy after this first run.
+loki.process "docker" {
+  forward_to = [loki.write.mosaic.receiver]
+  stage.drop {
+    older_than          = "1h"
+    drop_counter_reason = "historical_docker_replay"
+  }
+}
+
+otelcol.receiver.otlp "mosaic" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [
+      otelcol.connector.servicegraph.mosaic.input,
+      otelcol.connector.spanmetrics.mosaic.input,
+      otelcol.processor.batch.mosaic.input,
+    ]
+  }
+}
+
+// Generate service-dependency and RED metrics at the collector edge, then
+// remote-write them to Prometheus. Keep dimensions deliberately limited to
+// avoid unbounded cardinality from route IDs or broker request parameters.
+otelcol.connector.servicegraph "mosaic" {
+  metrics_flush_interval = "15s"
+  latency_histogram_buckets = ["5ms", "10ms", "25ms", "50ms", "100ms", "250ms", "500ms", "1s", "2.5s", "5s"]
+  output {
+    metrics = [otelcol.exporter.prometheus.mosaic.input]
+  }
+}
+
+otelcol.connector.spanmetrics "mosaic" {
+  namespace                     = "traces.spanmetrics"
+  metrics_flush_interval        = "15s"
+  aggregation_cardinality_limit = 1000
+  resource_metrics_key_attributes = ["service.name"]
+  histogram {
+    unit = "s"
+    explicit {
+      buckets = ["5ms", "10ms", "25ms", "50ms", "100ms", "250ms", "500ms", "1s", "2.5s", "5s"]
+    }
+  }
+  output {
+    metrics = [otelcol.exporter.prometheus.mosaic.input]
+  }
+}
+
+otelcol.exporter.prometheus "mosaic" {
+  forward_to = [prometheus.remote_write.mosaic.receiver]
+}
+
+prometheus.remote_write "mosaic" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+otelcol.processor.batch "mosaic" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+loki.write "mosaic" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

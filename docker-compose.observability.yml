@@ -1,0 +1,86 @@
+services:
+  alloy:
+    image: grafana/alloy:v1.10.0
+    command: ["run", "--server.http.listen-addr=0.0.0.0:12345", "--storage.path=/var/lib/alloy", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./observability/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy
+    ports:
+      - "${OTEL_COLLECTOR_HTTP_PORT:-4318}:4318"
+      - "${FARO_PORT:-12347}:12347"
+    depends_on:
+      tempo:
+        condition: service_started
+      loki:
+        condition: service_started
+
+  tempo:
+    image: grafana/tempo:2.8.1
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    volumes:
+      - ./observability/tempo.yaml:/etc/tempo/config.yaml:ro
+      - tempo_data:/var/tempo
+    depends_on:
+      prometheus:
+        condition: service_started
+    ports:
+      - "${TEMPO_PORT:-3200}:3200"
+
+  loki:
+    image: grafana/loki:3.7.0
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./observability/loki.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+
+  grafana:
+    image: grafana/grafana:11.5.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./observability/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./observability/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      tempo:
+        condition: service_started
+      loki:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:v3.5.1
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+
+  api:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+    depends_on:
+      alloy:
+        condition: service_started
+
+  web:
+    build:
+      args:
+        VITE_FARO_URL: ${VITE_FARO_URL:-http://localhost:12347/collect}
+
+volumes:
+  alloy_data:
+  tempo_data:
+  loki_data:
+  grafana_data:
+  prometheus_data:

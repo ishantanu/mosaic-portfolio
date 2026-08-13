@@ -1,0 +1,26 @@
+# Local secrets and developer-specific configuration
+.env
+.env.*
+!.env.example
+
+# Local runtime state and machine-specific artefacts
+.DS_Store
+/.pnpm-store/
+/tmp/
+/data/portfolio-history.json
+
+# Build and test output
+node_modules/
+dist/
+coverage/
+.vite/
+.cache/
+.eslintcache
+*.test
+*.tsbuildinfo
+
+# JavaScript package-manager diagnostics
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

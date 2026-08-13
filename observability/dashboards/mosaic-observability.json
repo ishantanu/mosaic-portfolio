@@ -1,0 +1,166 @@
+{
+  "uid": "mosaic-observability",
+  "title": "Mosaic · Service Health",
+  "tags": ["mosaic", "observability", "red"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "links": [{"title": "Frontend experience", "type": "link", "url": "/d/mosaic-frontend-experience", "tooltip": "Open Faro browser performance and experience signals", "icon": "external link"}],
+  "time": {"from": "now-6h", "to": "now"},
+  "annotations": {"list": []},
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Service health",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "API success ratio",
+      "description": "Request-based availability SLI: non-5xx customer-facing requests divided by all customer-facing requests. Health and metrics scrapes are excluded.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code!~\"5..\",http_route!~\"/(healthz|metrics)\"}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{http_route!~\"/(healthz|metrics)\"}[5m])), 0.000001)", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "colorMode": "background_solid", "graphMode": "none", "justifyMode": "auto"},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 1}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Request rate",
+      "description": "Completed HTTP requests per second, excluding health and metric scrapes.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "sum(rate(http_server_request_duration_seconds_count{http_route!~\"/(healthz|metrics)\"}[5m]))", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "decimals": 2}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "colorMode": "value", "graphMode": "area", "justifyMode": "auto"},
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 1}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "P95 latency",
+      "description": "95th percentile server response duration across customer-facing API routes.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{http_route!~\"/(healthz|metrics)\"}[5m])))", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "s", "decimals": 3, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 0.3}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "colorMode": "background_solid", "graphMode": "none", "justifyMode": "auto"},
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 1}
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "5xx error rate",
+      "description": "Percentage of API requests returning a 5xx status code.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\",http_route!~\"/(healthz|metrics)\"}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{http_route!~\"/(healthz|metrics)\"}[5m])), 0.000001)", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 0.01}, {"color": "red", "value": 0.05}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "orientation": "auto", "colorMode": "background_solid", "graphMode": "none", "justifyMode": "auto"},
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 1}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "API traffic by route",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{http_route!~\"/(healthz|metrics)\"}[5m]))", "legendFormat": "{{http_route}}"}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 12, "lineWidth": 2, "showPoints": "never"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "P95 latency by route",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "histogram_quantile(0.95, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{http_route!~\"/(healthz|metrics)\"}[5m])))", "legendFormat": "{{http_route}}"}],
+      "fieldConfig": {"defaults": {"unit": "s", "custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 12, "lineWidth": 2, "showPoints": "never"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 0.3}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}
+    },
+    {
+      "id": 8,
+      "type": "row",
+      "title": "Dependencies and traces",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 14}
+    },
+    {
+      "id": 9,
+      "type": "nodeGraph",
+      "title": "Service graph",
+      "description": "Trace-derived dependency graph. Select a node for its RED metrics and related traces.",
+      "datasource": {"type": "tempo", "uid": "tempo"},
+      "targets": [{"refId": "A", "queryType": "serviceMap", "serviceMapQuery": ""}],
+      "options": {"arcs": [{"field": "success", "color": "green"}, {"field": "error", "color": "red"}]},
+      "gridPos": {"h": 10, "w": 14, "x": 0, "y": 15}
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Trace-derived RED metrics",
+      "description": "Span rate, error rate and duration are produced by Alloy from received traces.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"refId": "A", "expr": "sum by (span_name) (rate(traces_spanmetrics_calls_total[5m]))", "legendFormat": "{{span_name}}", "instant": true, "format": "table"}],
+      "transformations": [{"id": "organize", "options": {"excludeByName": {"Time": true}, "renameByName": {"Value": "Requests/s", "span_name": "Span"}}}],
+      "fieldConfig": {"defaults": {"custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false}}, "overrides": []},
+      "options": {"showHeader": true, "cellHeight": "sm"},
+      "gridPos": {"h": 10, "w": 10, "x": 14, "y": 15}
+    },
+    {
+      "id": 11,
+      "type": "row",
+      "title": "Logs and browser experience",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 25}
+    },
+    {
+      "id": 12,
+      "type": "logs",
+      "title": "API logs · trace-correlated",
+      "description": "Structured API logs expose trace_id as a clickable Tempo link. Select View trace on a log entry to open its end-to-end trace.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "{source=\"docker\", stack=\"mosaic\"} |= \"http_request_completed\" | json | __error__=\"\"", "queryType": "range"}],
+      "options": {"showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "dedupStrategy": "none", "sortOrder": "Descending", "enableLogDetails": true},
+      "gridPos": {"h": 10, "w": 14, "x": 0, "y": 26}
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Faro browser telemetry ingested",
+      "description": "Browser measurements, exceptions and events accepted by Alloy's Faro receiver. Individual events are available in the Faro logs panel.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "sum(rate(faro_receiver_measurements_total[5m]))", "legendFormat": "Measurements/s"},
+        {"refId": "B", "expr": "sum(rate(faro_receiver_exceptions_total[5m]))", "legendFormat": "Exceptions/s"},
+        {"refId": "C", "expr": "sum(rate(faro_receiver_events_total[5m]))", "legendFormat": "Events/s"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops", "custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 12, "lineWidth": 2, "showPoints": "never"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi"}},
+      "gridPos": {"h": 5, "w": 10, "x": 14, "y": 26}
+    },
+    {
+      "id": 14,
+      "type": "logs",
+      "title": "Faro browser events and errors",
+      "description": "Frontend logs, events, web-vital measurements and exceptions sent by the Mosaic web app.",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "targets": [{"refId": "A", "expr": "{source=\"faro\"} | json", "queryType": "range"}],
+      "options": {"showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "dedupStrategy": "none", "sortOrder": "Descending", "enableLogDetails": true},
+      "gridPos": {"h": 5, "w": 10, "x": 14, "y": 31}
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Go runtime headroom",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"refId": "A", "expr": "go_goroutines", "legendFormat": "Goroutines"},
+        {"refId": "B", "expr": "go_memstats_heap_alloc_bytes", "legendFormat": "Heap allocated"}
+      ],
+      "fieldConfig": {"defaults": {"custom": {"drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 8, "lineWidth": 2, "showPoints": "never"}}, "overrides": [{"matcher": {"id": "byName", "options": "Heap allocated"}, "properties": [{"id": "unit", "value": "bytes"}]}]},
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 36}
+    }
+  ]
+}

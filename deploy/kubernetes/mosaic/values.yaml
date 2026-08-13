@@ -1,0 +1,38 @@
+nameOverride: ""
+fullnameOverride: ""
+imagePullSecrets: []
+
+api:
+  replicaCount: 1
+  image: {repository: ghcr.io/example/mosaic-api, tag: "", pullPolicy: IfNotPresent}
+  service: {port: 8081}
+  existingSecret: mosaic-secrets
+  secretKeys: {databaseURL: database-url, trading212APIKey: trading212-api-key, trading212SecretKey: trading212-secret-key}
+  accountID: demo-account
+  demoMode: true
+  brokerRefreshInterval: 15m
+  corsOrigin: ""
+  otelEndpoint: ""
+  otelServiceName: mosaic-api
+  resources:
+    requests: {cpu: 100m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 512Mi}
+
+web:
+  replicaCount: 2
+  image: {repository: ghcr.io/example/mosaic-web, tag: "", pullPolicy: IfNotPresent}
+  service: {port: 80}
+  resources:
+    requests: {cpu: 25m, memory: 32Mi}
+    limits: {cpu: 200m, memory: 128Mi}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: [{host: mosaic.example.com, paths: [{path: /, pathType: Prefix}]}]
+  tls: []
+
+podDisruptionBudget: {enabled: true, minAvailable: 1}
+autoscaling:
+  web: {enabled: false, minReplicas: 2, maxReplicas: 6, targetCPUUtilizationPercentage: 70}

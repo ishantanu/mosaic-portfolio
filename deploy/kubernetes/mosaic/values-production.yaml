@@ -1,0 +1,12 @@
+api:
+  replicaCount: 1 # Keep one until broker refresh coordination is shared.
+  demoMode: false
+  corsOrigin: https://mosaic.example.com
+web:
+  replicaCount: 2
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {cert-manager.io/cluster-issuer: letsencrypt-prod}
+  hosts: [{host: mosaic.example.com, paths: [{path: /, pathType: Prefix}]}]
+  tls: [{secretName: mosaic-tls, hosts: [mosaic.example.com]}]
