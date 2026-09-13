@@ -1,5 +1,7 @@
+import { Button, Input } from './ui/compat.js';
 import { useState } from '../react.js';
 import { html } from '../react.js';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog.jsx';
 
 const PRESETS = [
   { id: 'trading212', name: 'Trading 212', icon: '📈', endpoint: 'https://live.trading212.com/api/v0' },
@@ -29,9 +31,9 @@ function CloseIcon() {
 
 export function AddBrokerButton({ onClick }) {
   return html`
-    <button class="btn btn-add-broker" onClick=${onClick}>
+    <${Button} id="add-broker-trigger" class="btn btn-add-broker" onClick=${onClick}>
       <${PlusIcon} /> Add Broker
-    </button>`;
+    </${Button}>`;
 }
 
 export function AddBrokerModal({ onClose }) {
@@ -69,21 +71,16 @@ export function AddBrokerModal({ onClose }) {
     setTimeout(() => onClose(), 1400);
   }
 
-  function handleBackdropClick(e) {
-    if (e.target === e.currentTarget) onClose();
-  }
-
-  const preset = PRESETS.find(p => p.id === selected);
-
   return html`
-    <div class="modal-backdrop" onClick=${handleBackdropClick}>
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <${Dialog} open=${true} onOpenChange=${open => { if (!open) onClose(); }}>
+      <${DialogContent} className="broker-dialog" showCloseButton=${false} onCloseAutoFocus=${event => { event.preventDefault(); document.getElementById('add-broker-trigger')?.focus(); }}>
         <div class="modal-header">
-          <div class="modal-title" id="modal-title">Connect a Broker</div>
-          <button class="modal-close" onClick=${onClose} aria-label="Close">
+          <${DialogTitle}>Add a broker</${DialogTitle}>
+          <${Button} class="modal-close" onClick=${onClose} aria-label="Close">
             <${CloseIcon} />
-          </button>
+          </${Button}>
         </div>
+        <${DialogDescription}>Save connection details for this session. Importing data requires a configured backend connector.</${DialogDescription}>
 
         <form onSubmit=${handleSave}>
           <div class="modal-body">
@@ -93,10 +90,10 @@ export function AddBrokerModal({ onClose }) {
               ${PRESETS.map(p => {
                 const cls = 'broker-preset' + (selected === p.id ? ' selected' : '');
                 return html`
-                  <div class=${cls} key=${p.id} onClick=${() => selectPreset(p)}>
+                  <${Button} class=${cls} key=${p.id} aria-pressed=${selected === p.id} onClick=${() => selectPreset(p)}>
                     <div class="broker-preset-icon">${p.icon}</div>
                     <div class="broker-preset-name">${p.name}</div>
-                  </div>`;
+                  </${Button}>`;
               })}
             </div>
 
@@ -104,8 +101,9 @@ export function AddBrokerModal({ onClose }) {
 
             ${selected === 'custom' ? html`
               <div class="form-group">
-                <label class="form-label">Broker Name</label>
-                <input
+                <label class="form-label" htmlFor="broker-name">Broker Name</label>
+                <${Input}
+                  id="broker-name"
                   class="form-input"
                   type="text"
                   placeholder="My ISA Provider"
@@ -115,8 +113,9 @@ export function AddBrokerModal({ onClose }) {
               </div>` : null}
 
             <div class="form-group">
-              <label class="form-label">API Endpoint</label>
-              <input
+              <label class="form-label" htmlFor="broker-endpoint">API Endpoint</label>
+              <${Input}
+                id="broker-endpoint"
                 class="form-input"
                 type="url"
                 placeholder="https://api.provider.com/v1"
@@ -128,8 +127,9 @@ export function AddBrokerModal({ onClose }) {
             </div>
 
             <div class="form-group">
-              <label class="form-label">API Key</label>
-              <input
+              <label class="form-label" htmlFor="broker-api-key">API Key</label>
+              <${Input}
+                id="broker-api-key"
                 class="form-input"
                 type="password"
                 placeholder="Enter your API key"
@@ -142,8 +142,9 @@ export function AddBrokerModal({ onClose }) {
             </div>
 
             <div class="form-group">
-              <label class="form-label">API Secret ${html`<span style=${{fontWeight:400,textTransform:'none',letterSpacing:0}}>(optional)</span>`}</label>
-              <input
+              <label class="form-label" htmlFor="broker-api-secret">API Secret ${html`<span style=${{fontWeight:400,textTransform:'none',letterSpacing:0}}>(optional)</span>`}</label>
+              <${Input}
+                id="broker-api-secret"
                 class="form-input"
                 type="password"
                 placeholder="Enter your API secret if required"
@@ -156,12 +157,12 @@ export function AddBrokerModal({ onClose }) {
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-ghost" onClick=${onClose}>Cancel</button>
-            <button type="submit" class="btn btn-primary" disabled=${saving || saved}>
-              ${saved ? '✓ Connected' : saving ? 'Connecting…' : 'Connect Broker'}
-            </button>
+            <${Button} type="button" class="btn btn-ghost" onClick=${onClose}>Cancel</${Button}>
+            <${Button} type="submit" class="btn btn-primary" disabled=${saving || saved}>
+              ${saved ? '✓ Saved for session' : saving ? 'Saving…' : 'Save connection details'}
+            </${Button}>
           </div>
         </form>
-      </div>
-    </div>`;
+      </${DialogContent}>
+    </${Dialog}>`;
 }

@@ -1,3 +1,4 @@
+import { Button, Table, Card } from '../components/ui/compat.js';
 import { html, useState } from '../react.js';
 import { useApi } from '../useApi.js';
 import { endpoints } from '../api.js';
@@ -20,7 +21,7 @@ function positionReturn(pos) {
 
 function SortableHeader({ label, sortKey, active, direction, onSort }) {
   return html`<th class="text-right" aria-sort=${active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-    <button class=${'table-sort-button' + (active ? ' active' : '')} onClick=${() => onSort(sortKey)}>${label}<span>${active ? (direction === 'asc' ? '↑' : '↓') : '↕'}</span></button>
+    <${Button} class=${'table-sort-button' + (active ? ' active' : '')} onClick=${() => onSort(sortKey)}>${label}<span>${active ? (direction === 'asc' ? '↑' : '↓') : '↕'}</span></${Button}>
   </th>`;
 }
 
@@ -112,7 +113,7 @@ function EffectiveExposure({ positions, total, visible }) {
   const maxWeight = exposures[0].weight || 1;
   const sortedExposures = [...exposures].sort((left, right) => (left.weight - right.weight) * (direction === 'asc' ? 1 : -1));
   return html`<section class="card effective-exposure-card">
-    <div class="card-header"><div><div class="card-title-row"><div class="card-title">Effective company exposure</div><${EffectiveInfo} source=${snapshot?.source + ' · ' + snapshot?.asOf + ' · partial top-holdings coverage'} /></div><div class="card-subtitle">All companies covered by your current ETF constituent snapshots</div></div><div class="effective-card-actions"><button type="button" class="effective-sort-button" onClick=${() => setDirection(current => current === 'desc' ? 'asc' : 'desc')}>Effective % ${direction === 'desc' ? '↓' : '↑'}</button></div></div>
+    <div class="card-header"><div><div class="card-title-row"><div class="card-title">Effective company exposure</div><${EffectiveInfo} source=${snapshot?.source + ' · ' + snapshot?.asOf + ' · partial top-holdings coverage'} /></div><div class="card-subtitle">All companies covered by your current ETF constituent snapshots</div></div><div class="effective-card-actions"><${Button} type="button" class="effective-sort-button" onClick=${() => setDirection(current => current === 'desc' ? 'asc' : 'desc')}>Effective % ${direction === 'desc' ? '↓' : '↑'}</${Button}></div></div>
     <div class="effective-exposure-legend"><span><i class="direct"></i>Direct shares</span><span><i class="indirect"></i>Via ETFs</span><span>${exposures.length} companies currently mapped</span></div>
     <div class="effective-exposure-map">
       <div class="effective-exposure-columns"><span>Company</span><span>Combined exposure</span><span>Direct</span><span>Via ETFs</span><span>Effective</span></div>
@@ -157,7 +158,7 @@ function EffectiveInfo({ source }) {
     setPosition({ top: rect.bottom + 8, left: Math.max(150, Math.min(rect.left + rect.width / 2, window.innerWidth - 170)) });
     setOpen(true);
   };
-  return html`<span class="panel-info-wrap"><button type="button" class="panel-info" aria-label="About effective company exposure" onMouseEnter=${show} onMouseLeave=${() => setOpen(false)} onFocus=${show} onBlur=${() => setOpen(false)}>i</button>${open ? html`<span role="tooltip" class="panel-info-tooltip" style=${{ top: position.top + 'px', left: position.left + 'px' }}>Effective exposure combines direct shares in a company with its estimated weight inside ETFs you hold. It is a current, partial look-through based on dated published ETF constituents, not a live or complete fund holding record. Source: ${source}.</span>` : null}</span>`;
+  return html`<span class="panel-info-wrap"><${Button} type="button" class="panel-info" aria-label="About effective company exposure" onMouseEnter=${show} onMouseLeave=${() => setOpen(false)} onFocus=${show} onBlur=${() => setOpen(false)}>i</${Button}>${open ? html`<span role="tooltip" class="panel-info-tooltip" style=${{ top: position.top + 'px', left: position.left + 'px' }}>Effective exposure combines direct shares in a company with its estimated weight inside ETFs you hold. It is a current, partial look-through based on dated published ETF constituents, not a live or complete fund holding record. Source: ${source}.</span>` : null}</span>`;
 }
 
 export default function PositionsView({ visible, refreshKey }) {
@@ -190,9 +191,9 @@ export default function PositionsView({ visible, refreshKey }) {
     ${!loading && !error && positions.length ? html`<${OverlapAndIntelligence} positions=${positions} total=${total} visible=${visible} />` : null}
     ${!loading && !error && positions.length ? html`<${PortfolioReview} positions=${positions} total=${total} topThree=${topThree} largest=${largest} visible=${visible} />` : null}
 
-    <div class="card positions-table-card">
+    <${Card} class="card positions-table-card">
       <div class="card-header"><div><div class="card-title">Positions</div><div class="card-subtitle">${loading ? 'Loading…' : positions.length + ' open position' + (positions.length === 1 ? '' : 's') + ' · ordered by ' + (sort.key === 'pnl' ? 'unrealised P/L %' : sort.key)}</div></div></div>
-      <div class="data-table-wrap"><table class="data-table"><thead><tr>
+      <div class="data-table-wrap"><${Table} class="data-table"><thead><tr>
         <th>Instrument</th><${SortableHeader} label="Quantity" sortKey="quantity" active=${sort.key === 'quantity'} direction=${sort.direction} onSort=${handleSort} />
         <th class="text-right">Avg. cost</th><th class="text-right">Current price</th><${SortableHeader} label="Market value" sortKey="value" active=${sort.key === 'value'} direction=${sort.direction} onSort=${handleSort} />
         <${SortableHeader} label="Unrealised P/L %" sortKey="pnl" active=${sort.key === 'pnl'} direction=${sort.direction} onSort=${handleSort} />
@@ -201,7 +202,7 @@ export default function PositionsView({ visible, refreshKey }) {
           : error ? html`<tr><td colspan="6"><div class="state-container"><div class="state-icon">⚠</div><div class="state-title">Failed to load positions</div><div class="state-body">${error}</div></div></td></tr>`
           : positions.length === 0 ? html`<tr><td colspan="6"><div class="state-container"><div class="state-icon">▦</div><div class="state-title">No open positions</div><div class="state-body">You have no open positions at this time.</div></div></td></tr>`
           : ranked.map((position, index) => html`<${PositionRow} key=${holdingIdentity(position) || index} pos=${position} visible=${visible} portfolioValue=${total} />`)}
-      </tbody></table></div>
-    </div>
+      </tbody></${Table}></div>
+    </${Card}>
   </div>`;
 }

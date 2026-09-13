@@ -1,3 +1,4 @@
+import { Table, Card } from '../components/ui/compat.js';
 import { html } from '../react.js';
 import { useApi } from '../useApi.js';
 import { endpoints } from '../api.js';
@@ -73,7 +74,7 @@ export default function OrdersView({ visible, refreshKey }) {
         <p class="page-subtitle">Your most recent 20 orders</p>
       </div>
 
-      <div class="card">
+      <${Card} class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Orders</div>
@@ -82,7 +83,7 @@ export default function OrdersView({ visible, refreshKey }) {
         </div>
 
         <div class="data-table-wrap">
-          <table class="data-table">
+          <${Table} class="data-table">
             <thead>
               <tr>
                 <th>Instrument</th>
@@ -128,8 +129,8 @@ export default function OrdersView({ visible, refreshKey }) {
                         />`)
               }
             </tbody>
-          </table>
+          </${Table}>
         </div>
-      </div>
+      </${Card}>
     </div>`;
 }

@@ -1,12 +1,13 @@
 import { html } from '../react.js';
+import { LayoutDashboard, Wallet, ChartNoAxesCombined, ListOrdered, Coins, Settings } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { hash: '#dashboard', label: 'Dashboard',      icon: '⊞' },
-  { hash: '#summary',   label: 'Acct. Summary',  icon: '◈' },
-  { hash: '#positions', label: 'Positions',       icon: '▦' },
-  { hash: '#orders',    label: 'Orders',          icon: '≡' },
-  { hash: '#dividends', label: 'Dividends',       icon: '◎' },
-  { hash: '#settings',  label: 'Settings',        icon: '⚙' },
+  { hash: '#dashboard', label: 'Overview', icon: LayoutDashboard },
+  { hash: '#summary', label: 'Account summary', icon: Wallet },
+  { hash: '#positions', label: 'Positions', icon: ChartNoAxesCombined },
+  { hash: '#orders', label: 'Orders', icon: ListOrdered },
+  { hash: '#dividends', label: 'Dividends', icon: Coins },
+  { hash: '#settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Sidebar({ currentHash, open, onClose, summary }) {
@@ -37,8 +38,8 @@ export default function Sidebar({ currentHash, open, onClose, summary }) {
             const cls = currentHash === item.hash ? 'active' : '';
             return html`
               <li class="nav-item" key=${item.hash}>
-                <a href=${item.hash} class=${cls} onClick=${onClose}>
-                  <span class="nav-icon">${item.icon}</span>
+                <a href=${item.hash} class=${cls} onClick=${onClose} aria-current=${currentHash === item.hash ? 'page' : undefined}>
+                  <${item.icon} size=${17} strokeWidth=${1.7} aria-hidden="true" />
                   ${item.label}
                 </a>
               </li>`;

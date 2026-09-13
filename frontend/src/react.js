@@ -11,11 +11,25 @@ export {
   useCallback,
   useRef,
   useMemo,
-} from 'https://esm.sh/react@18.3.1';
+} from 'react';
 
-export { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+export { createRoot } from 'react-dom/client';
 
 // Bind htm to THIS React.createElement — not htm's own bundled React copy
-import _htm from 'https://esm.sh/htm@3.1.1';
-import { createElement as _h } from 'https://esm.sh/react@18.3.1';
-export const html = _htm.bind(_h);
+import _htm from 'htm';
+import { createElement as _h } from 'react';
+// htm templates use HTML spelling; React's development build expects DOM props.
+const domProps = {
+  class: 'className', for: 'htmlFor', colspan: 'colSpan', rowspan: 'rowSpan',
+  autocomplete: 'autoComplete', tabindex: 'tabIndex',
+  'stroke-width': 'strokeWidth', 'stroke-linecap': 'strokeLinecap',
+  'stroke-linejoin': 'strokeLinejoin', 'stroke-dasharray': 'strokeDasharray',
+  'stroke-dashoffset': 'strokeDashoffset', 'text-anchor': 'textAnchor',
+  'fill-rule': 'fillRule', 'clip-rule': 'clipRule',
+};
+export const html = _htm.bind((type, props, ...children) => {
+  const normalized = props && Object.fromEntries(Object.entries(props).map(
+    ([key, value]) => [domProps[key] || key, value],
+  ));
+  return _h(type, normalized, ...children);
+});

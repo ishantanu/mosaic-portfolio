@@ -1,4 +1,5 @@
 import { html } from '../react.js';
+import { Switch } from '../components/ui/switch.jsx';
 
 function SettingRow({ label, desc, children }) {
   return html`
@@ -13,10 +14,7 @@ function SettingRow({ label, desc, children }) {
 
 function ToggleSwitch({ checked, onChange }) {
   return html`
-    <label class="toggle-switch">
-      <input type="checkbox" checked=${checked} onChange=${onChange} />
-      <span class="toggle-track"></span>
-    </label>`;
+    <${Switch} checked=${checked} onCheckedChange=${onChange} aria-label="Hide financial values" />`;
 }
 
 function BrokerChip() {
@@ -61,7 +59,7 @@ export default function SettingsView({ visible, onToggleValues }) {
           <${MonoValue}>live.trading212.com</${MonoValue}>
         </${SettingRow}>
         <${SettingRow} label="Broker refresh interval" desc="Broker data is cached for 15 minutes to respect upstream rate limits">
-          <div class="settings-row-value">30 seconds</div>
+          <div class="settings-row-value">15 minutes</div>
         </${SettingRow}>
         <${SettingRow} label="Rate Limit" desc="Token bucket enforced on outbound API requests">
           <div class="settings-row-value">4 req/s</div>
@@ -77,7 +75,7 @@ export default function SettingsView({ visible, onToggleValues }) {
           <div class="settings-row-value">Go / net/http</div>
         </${SettingRow}>
         <${SettingRow} label="Frontend">
-          <div class="settings-row-value">React 18 · htm · ESM (no build step)</div>
+          <div class="settings-row-value">React · shadcn/ui · Tailwind CSS</div>
         </${SettingRow}>
       </div>
 

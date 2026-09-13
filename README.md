@@ -33,7 +33,7 @@ Interactive Brokers, Saxo, IG, or other providers can supply live data.
 
 | Area | Choice |
 | --- | --- |
-| Web application | React-compatible components with htm, built by Vite |
+| Web application | React + htm, shadcn/ui, Tailwind CSS, built by Vite |
 | API | Go standard-library HTTP server |
 | Data | PostgreSQL portfolio-history store |
 | Broker integration | Trading 212 REST API |

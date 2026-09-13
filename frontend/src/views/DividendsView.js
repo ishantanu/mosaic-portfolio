@@ -1,3 +1,4 @@
+import { Table, Card } from '../components/ui/compat.js';
 import { html } from '../react.js';
 import { useApi } from '../useApi.js';
 import { endpoints } from '../api.js';
@@ -61,7 +62,7 @@ export default function DividendsView({ visible, refreshKey }) {
           </div>
         </div>` : null}
 
-      <div class="card">
+      <${Card} class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Payment History</div>
@@ -70,7 +71,7 @@ export default function DividendsView({ visible, refreshKey }) {
         </div>
 
         <div class="data-table-wrap">
-          <table class="data-table">
+          <${Table} class="data-table">
             <thead>
               <tr>
                 <th>Instrument</th>
@@ -112,8 +113,8 @@ export default function DividendsView({ visible, refreshKey }) {
                         />`)
               }
             </tbody>
-          </table>
+          </${Table}>
         </div>
-      </div>
+      </${Card}>
     </div>`;
 }

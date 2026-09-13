@@ -1,3 +1,4 @@
+import { Card } from '../components/ui/compat.js';
 import { Fragment, html } from '../react.js';
 import { useApi } from '../useApi.js';
 import { endpoints } from '../api.js';
@@ -119,7 +120,7 @@ export default function AccountSummaryView({ visible, refreshKey }) {
     </div>
 
     ${loading ? html`<div class="summary-row">${[1,2,3,4].map(i => html`<div class="summary-cell" key=${i}><div class="summary-cell-label"><span class="skeleton skeleton-block sm"></span></div><div class="summary-cell-value"><span class="skeleton skeleton-block"></span></div></div>`)}</div>` : null}
-    ${error ? html`<div class="card"><div class="state-container"><div class="state-icon">⚠</div><div class="state-title">Failed to load account summary</div><div class="state-body">${error}</div></div></div>` : null}
+    ${error ? html`<${Card} class="card"><div class="state-container"><div class="state-icon">⚠</div><div class="state-title">Failed to load account summary</div><div class="state-body">${error}</div></div></${Card}>` : null}
 
     ${!loading && !error && data ? html`<${Fragment}>
       <div class="summary-row">

@@ -1,5 +1,7 @@
+import { Button } from './ui/compat.js';
 import { html } from '../react.js';
 import { AddBrokerButton } from './AddBrokerModal.js';
+import { Sun, Moon, PanelsTopLeft } from 'lucide-react';
 
 // Inject spin keyframes once
 if (typeof document !== 'undefined' && !document.getElementById('_spin_kf')) {
@@ -46,7 +48,7 @@ function MenuIcon() {
     </svg>`;
 }
 
-function ThemeIcon({ dark }) { return html`<span aria-hidden="true">${dark ? '☀' : '◐'}</span>`; }
+function ThemeIcon({ dark }) { return html`<${dark ? Sun : Moon} size=${16} aria-hidden="true" />`; }
 
 export default function TopBar({
   currentPage,
@@ -73,27 +75,29 @@ export default function TopBar({
   return html`
     <header class="topbar">
       <div class="topbar-left">
-        <button class="mobile-menu-button" type="button" onClick=${onMenuToggle} aria-label="Open navigation menu">
+        <${Button} class="mobile-menu-button" type="button" onClick=${onMenuToggle} aria-label="Open navigation menu">
           <${MenuIcon} />
-        </button>
-        <span class="topbar-breadcrumb">
-          Portfolio
-          <span style=${{ color: '#c4cad4', margin: '0 6px' }}>›</span>
-          <span>${currentPage || 'Overview'}</span>
-        </span>
+        </${Button}>
+        <div class="workspace-heading">
+          <span class="workspace-heading-icon" aria-hidden="true"><${PanelsTopLeft} size=${18} strokeWidth=${1.6} /></span>
+          <div class="workspace-heading-copy">
+            <span class="workspace-heading-label">Investment workspace</span>
+            <span class="workspace-heading-title">${currentPage === 'Dashboard' ? 'Portfolio overview' : currentPage || 'Portfolio overview'}</span>
+          </div>
+        </div>
       </div>
 
       <div class="topbar-right">
         ${timeStr ? html`<span class="last-updated">Updated ${timeStr}</span>` : null}
-        <button class="btn btn-ghost btn-icon" type="button" onClick=${onToggleTheme} title=${darkTheme ? 'Use light theme' : 'Use dark theme'}><${ThemeIcon} dark=${darkTheme} /></button>
+        <${Button} class="btn btn-ghost btn-icon" type="button" onClick=${onToggleTheme} title=${darkTheme ? 'Use light theme' : 'Use dark theme'}><${ThemeIcon} dark=${darkTheme} /></${Button}>
         <span class="topbar-add-broker"><${AddBrokerButton} onClick=${onAddBroker} /></span>
 
-        <button class=${toggleCls} onClick=${onToggleValues} title=${toggleTitle}>
+        <${Button} class=${toggleCls} onClick=${onToggleValues} title=${toggleTitle}>
           ${valuesVisible ? html`<${EyeOpenIcon} />` : html`<${EyeClosedIcon} />`}
           ${' ' + toggleLabel}
-        </button>
+        </${Button}>
 
-        <button
+        <${Button}
           class="btn btn-ghost btn-icon"
           type="button"
           onClick=${onRefresh}
@@ -101,7 +105,7 @@ export default function TopBar({
           title="Refresh data"
         >
           <${RefreshIcon} spinning=${refreshing} />
-        </button>
+        </${Button}>
       </div>
     </header>`;
 }

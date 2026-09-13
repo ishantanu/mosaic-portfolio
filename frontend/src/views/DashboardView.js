@@ -1,3 +1,4 @@
+import { Button, Table, Input, Card } from '../components/ui/compat.js';
 import { Fragment, useEffect, useState } from '../react.js';
 import { html } from '../react.js';
 import { useApi } from '../useApi.js';
@@ -244,7 +245,7 @@ function PortfolioHealthPanel({ holdings, invested, portfolioValue, cash, terOcf
   return html`<section class="portfolio-health card">
     <div class="card-header">
       <div><div class="chart-title-row"><div class="card-title">Portfolio health</div><${PanelInfo} text="Portfolio health compares your current portfolio with guardrails you control. It is an information tool, not a personal recommendation to buy, sell or hold an investment." /></div><div class="card-subtitle">Your policy guardrails, remaining error budget and data freshness</div></div>
-      <div class="health-header-actions"><span class=${'health-summary ' + (breaches ? 'at-risk' : 'healthy')}>${breaches ? `${breaches} guardrail${breaches === 1 ? '' : 's'} breached` : 'Within policy'}</span><button type="button" class="effective-sort-button" onClick=${() => setEditing(current => !current)}>${editing ? 'Done' : 'Edit guardrails'}</button></div>
+      <div class="health-header-actions"><span class=${'health-summary ' + (breaches ? 'at-risk' : 'healthy')}>${breaches ? `${breaches} guardrail${breaches === 1 ? '' : 's'} breached` : 'Within policy'}</span><${Button} type="button" class="effective-sort-button" onClick=${() => setEditing(current => !current)}>${editing ? 'Done' : 'Edit guardrails'}</${Button}></div>
     </div>
     <div class="health-grid">
       ${metrics.map(metric => {
@@ -256,7 +257,7 @@ function PortfolioHealthPanel({ holdings, invested, portfolioValue, cash, terOcf
         return html`<article class=${'health-slo ' + state} key=${metric.key}>
           <div class="health-slo-top"><span>${metric.label}</span><b>${state === 'healthy' ? 'Healthy' : state === 'breached' ? 'Breached' : 'Awaiting data'}</b></div>
           <strong>${actualText}</strong><small>${metric.subject}</small><div class="health-budget">${budgetText}</div>
-          ${editing ? html`<label class="health-target">Target ≤ <input type="number" min="0" step=${metric.type === 'seconds' ? '1' : '0.1'} value=${metric.target} onInput=${event => updatePolicy(metric.key, event.target.value)} />${metric.unit}</label>` : html`<div class="health-target">Target ≤ ${metric.target}${metric.unit}</div>`}
+          ${editing ? html`<label class="health-target">Target ≤ <${Input} type="number" min="0" step=${metric.type === 'seconds' ? '1' : '0.1'} value=${metric.target} onInput=${event => updatePolicy(metric.key, event.target.value)} />${metric.unit}</label>` : html`<div class="health-target">Target ≤ ${metric.target}${metric.unit}</div>`}
         </article>`;
       })}
     </div>
@@ -267,7 +268,7 @@ function PortfolioHealthPanel({ holdings, invested, portfolioValue, cash, terOcf
 function RangePicker({ range, onChange }) {
   return html`<div class="chart-range" aria-label="Chart time range">
     ${TIME_RANGES.map(([value, label]) => html`
-      <button key=${value} class=${'chart-range-button' + (range === value ? ' active' : '')} onClick=${() => onChange(value)}>${label}</button>`)}
+      <${Button} key=${value} class=${'chart-range-button' + (range === value ? ' active' : '')} onClick=${() => onChange(value)}>${label}</${Button}>`)}
   </div>`;
 }
 
@@ -290,7 +291,7 @@ function PanelInfo({ text }) {
     setOpen(true);
   };
   return html`<span class="panel-info-wrap">
-    <button type="button" class="panel-info" aria-label="More information" aria-describedby=${open ? tooltipId : undefined} onMouseEnter=${show} onMouseLeave=${() => setOpen(false)} onFocus=${show} onBlur=${() => setOpen(false)}>i</button>
+    <${Button} type="button" class="panel-info" aria-label="More information" aria-describedby=${open ? tooltipId : undefined} onMouseEnter=${show} onMouseLeave=${() => setOpen(false)} onFocus=${show} onBlur=${() => setOpen(false)}>i</${Button}>
     ${open ? html`<span id=${tooltipId} role="tooltip" class="panel-info-tooltip" style=${{ top: `${position.top}px`, left: `${position.left}px` }}>${text}</span>` : null}
   </span>`;
 }
@@ -474,10 +475,10 @@ function SectorPieChart({ holdings, visible, currency, pace }) {
                 <text class="sector-pie-label" x="88" y="100" text-anchor="middle">Invested</text>
               </svg>
               <div class="sector-legend">
-                ${slices.map(slice => html`<button key=${slice.name} class=${activeSector === slice.index ? 'active' : ''} onMouseEnter=${() => setActiveSector(slice.index)} onMouseLeave=${() => setActiveSector(null)}>
+                ${slices.map(slice => html`<${Button} key=${slice.name} class=${activeSector === slice.index ? 'active' : ''} onMouseEnter=${() => setActiveSector(slice.index)} onMouseLeave=${() => setActiveSector(null)}>
                   <i style=${{ background: EXPOSURE_COLOURS[slice.index % EXPOSURE_COLOURS.length] }}></i>
                   <span>${slice.name}</span><strong>${visible ? slice.pct.toFixed(1) + '%' : '••••'}</strong>
-                </button>`)}
+                </${Button}>`)}
                 ${pace ? html`<div class="contribution-insight">
                   <strong>Contribution pace</strong>
                   <span>${visible ? formatMoney(pace.last30, currency, true) : '••••'} in the past 30 days · ${visible ? formatMoney(pace.ytd, currency, true) : '••••'} YTD</span>
@@ -550,7 +551,7 @@ function SortableHeader({ label, sortKey, activeKey, direction, onSort, alignRig
   const active = activeKey === sortKey;
   const indicator = active ? (direction === 'asc' ? '↑' : '↓') : '↕';
   return html`<th class=${alignRight ? 'text-right' : ''} aria-sort=${active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-    <button class=${'table-sort-button' + (active ? ' active' : '')} onClick=${() => onSort(sortKey)}>${label}<span aria-hidden="true">${indicator}</span></button>
+    <${Button} class=${'table-sort-button' + (active ? ' active' : '')} onClick=${() => onSort(sortKey)}>${label}<span aria-hidden="true">${indicator}</span></${Button}>
   </th>`;
 }
 
@@ -646,7 +647,7 @@ function IsaCashEfficiencyPanel({ cash, portfolioValue, currency, visible }) {
     <div class="card-header"><div><div class="chart-title-row"><div class="card-title">ISA cash efficiency</div><${PanelInfo} text="Estimates the potential 22% charge on interest credited to cash held in a Stocks & Shares ISA under planned HMRC reforms from 6 April 2027. It uses your editable cash-rate assumption, not broker-reported interest, and the proposed rules may change." /></div><div class="card-subtitle">Planned 2027 rule · estimate only · not tax advice</div></div><span class="isa-cash-planned">Planned</span></div>
     <div class="isa-cash-grid">
       <div><span>Cash held</span><strong>${formatMoney(cash, currency, visible)}</strong><small>${visible ? cashAllocation.toFixed(1) + '% of portfolio' : '••••'}</small></div>
-      <div><span>Assumed cash rate</span><strong><input type="number" min="0" step="0.01" inputMode="decimal" value=${rate} style=${{ width: `${Math.max(7, String(rate).length + 2)}ch` }} onInput=${updateRate} aria-label="Assumed annual cash interest rate" />%</strong><small>Editable annual assumption</small></div>
+      <div><span>Assumed cash rate</span><strong><${Input} type="number" min="0" step="0.01" inputMode="decimal" value=${rate} style=${{ width: `${Math.max(7, String(rate).length + 2)}ch` }} onInput=${updateRate} aria-label="Assumed annual cash interest rate" />%</strong><small>Editable annual assumption</small></div>
       <div><span>Estimated annual interest</span><strong>${formatMoney(annualInterest, currency, visible)}</strong><small>Before any proposed charge</small></div>
       <div class="isa-cash-charge"><span>Potential 22% charge</span><strong>${formatMoney(estimatedCharge, currency, visible)}</strong><small>On interest, not cash balance</small></div>
     </div>
@@ -723,16 +724,18 @@ function HoldingsPagination({ page, pageCount, total, pageSize, onPageChange }) 
     <div class="table-pagination">
       <div class="table-pagination-summary">Showing ${first}–${last} of ${total} holdings</div>
       <nav class="table-pagination-controls" aria-label="Holdings pages">
-        <button class="pagination-button" type="button" disabled=${page === 1} onClick=${() => onPageChange(page - 1)}>Previous</button>
+        <${Button} class="pagination-button" type="button" disabled=${page === 1} onClick=${() => onPageChange(page - 1)}>Previous</${Button}>
         ${pageNumbers.map((number, index) => html`
+          <${Fragment} key=${number}>
           ${index > 0 && number - pageNumbers[index - 1] > 1 ? html`<span class="pagination-ellipsis">…</span>` : null}
-          <button
+          <${Button}
             class=${'pagination-button pagination-number' + (number === page ? ' active' : '')}
             type="button"
             aria-current=${number === page ? 'page' : null}
             onClick=${() => onPageChange(number)}
-          >${number}</button>`)}
-        <button class="pagination-button" type="button" disabled=${page === pageCount} onClick=${() => onPageChange(page + 1)}>Next</button>
+          >${number}</${Button}>
+          </${Fragment}>`)}
+        <${Button} class="pagination-button" type="button" disabled=${page === pageCount} onClick=${() => onPageChange(page + 1)}>Next</${Button}>
       </nav>
     </div>`;
 }
@@ -857,7 +860,7 @@ export default function DashboardView({ visible, refreshKey }) {
         />
       </div>
 
-      <div class="card">
+      <${Card} class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Holdings</div>
@@ -866,7 +869,7 @@ export default function DashboardView({ visible, refreshKey }) {
         </div>
 
         <div class="data-table-wrap">
-          <table class="data-table">
+          <${Table} class="data-table">
             <thead>
               <tr>
                 <th>Instrument</th>
@@ -884,7 +887,7 @@ export default function DashboardView({ visible, refreshKey }) {
                 visible=${visible}
               />
             </tbody>
-          </table>
+          </${Table}>
         </div>
         ${!portLoading && !portError ? html`<${HoldingsPagination}
           page=${activeHoldingPage}
@@ -893,10 +896,10 @@ export default function DashboardView({ visible, refreshKey }) {
           pageSize=${HOLDINGS_PAGE_SIZE}
           onPageChange=${setHoldingPage}
         />` : null}
-      </div>
+      </${Card}>
 
       <section class="secondary-analytics card">
-        <button
+        <${Button}
           type="button"
           class="secondary-analytics-toggle"
           aria-expanded=${analysisOpen}
@@ -909,7 +912,7 @@ export default function DashboardView({ visible, refreshKey }) {
             <small>Review guardrails, cash drag and planned ISA cash rules.</small>
           </span>
           <span class="secondary-analytics-action">${analysisOpen ? 'Hide' : 'Review'} <i aria-hidden="true">${analysisOpen ? '⌃' : '⌄'}</i></span>
-        </button>
+        </${Button}>
         ${analysisOpen ? html`<div id="portfolio-analysis-content" class="secondary-analytics-content">
           <${PortfolioHealthPanel}
             holdings=${holdings}

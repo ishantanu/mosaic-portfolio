@@ -42,7 +42,10 @@ export default function App() {
   const [brokerModalOpen, setBrokerModalOpen] = useState(false);
   const { data: accountSummary } = useApi(endpoints.accountSummary, refreshKey);
 
-  useEffect(() => { window.localStorage.setItem('mosaic-theme', darkTheme ? 'dark' : 'light'); }, [darkTheme]);
+  useEffect(() => {
+    window.localStorage.setItem('mosaic-theme', darkTheme ? 'dark' : 'light');
+    document.documentElement.classList.toggle('theme-dark', darkTheme);
+  }, [darkTheme]);
 
   // ── Hash-based routing ──────────────────────────────────────────────────────
   useEffect(() => {
