@@ -49,6 +49,14 @@ live dashboard totals. Reimporting an identical snapshot is a no-op, including
 when CSV rows or columns are reordered. A changed snapshot is saved separately.
 The page lists the most recent 100 imports; prices remain as of the snapshot date.
 
+**Compare snapshots** on the same page lets you choose a From and To import.
+It shows added, removed, changed and unchanged holdings, quantity differences,
+and snapshot-value differences grouped by currency. Holdings match by broker,
+account and ticker. Currency changes are flagged instead of calculating a
+cross-currency difference. Privacy mode masks comparison values and account IDs.
+These are differences in snapshot contents, not investment returns or confirmed
+trades; compare snapshots with matching account coverage. No paid APIs are used.
+
 - Supported format: Mosaic version 1 holdings CSV, UTF-8, comma-separated, with
   the exported column names. Maximum 2 MiB and 10,000 holdings per import.
 - Includes broker/account identifiers, instrument details, quantities, prices,

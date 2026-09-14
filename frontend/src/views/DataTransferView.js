@@ -4,6 +4,7 @@ import { Button, Card, Input, Table } from '../components/ui/compat.js';
 import { TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/table.jsx';
 import { endpoints } from '../api.js';
 import { useApi } from '../useApi.js';
+import SnapshotComparison from '../components/SnapshotComparison.js';
 
 async function checkedFetch(url, options) {
   const response = await fetch(url, { ...options, signal: AbortSignal.timeout(20000) });
@@ -111,6 +112,7 @@ export default function DataTransferView({ visible, refreshKey }) {
       <p class="text-sm text-muted-foreground">Most recent 100 imports. Open a snapshot to inspect or re-export it. Snapshot prices are historical, not live quotes.</p>
       ${imports.loading ? html`<p role="status">Loading snapshots…</p>` : imports.error ? html`<div role="alert">Could not load saved snapshots. <${Button} onClick=${() => setRevision(n => n + 1)}>Retry</${Button}></div>` : !imports.data?.length ? html`<p class="text-sm text-muted-foreground">No imported snapshots yet. Download a CSV above to try a round trip.</p>` : html`<div class="space-y-2">${imports.data.map(item => html`<div key=${item.id} class="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3"><div><div class="text-sm">Snapshot ${new Date(item.snapshotAt).toLocaleString()}</div><div class="text-xs text-muted-foreground">Imported ${new Date(item.importedAt).toLocaleString()}</div></div><${Button} disabled=${busy} onClick=${() => { setSelected(item.id); setCandidate(null); }}>Open snapshot</${Button}></div>`)}</div>`}
     </${Card}>
+    ${!imports.loading && !imports.error && imports.data ? html`<${SnapshotComparison} snapshots=${imports.data} visible=${visible} />` : null}
     ${selected ? html`<${Card} class="p-6 gap-4"><h2 class="text-lg font-semibold">Imported holdings</h2>
       ${saved.loading ? html`<p role="status">Loading holdings…</p>` : saved.error ? html`<p role="alert">Could not load this snapshot. Reopen the page to retry.</p>` : saved.data?.id === selected ? html`<${SnapshotTable} key=${selected} snapshot=${saved.data} visible=${visible} /><${Button} class="self-start" disabled=${busy} onClick=${() => download(selected)}>Export this snapshot</${Button}>` : null}
     </${Card}>` : null}
