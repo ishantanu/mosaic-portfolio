@@ -15,6 +15,7 @@ import (
 	"mosaic/internal/adapters/postgres"
 	"mosaic/internal/adapters/trading212"
 	"mosaic/internal/application"
+	"mosaic/internal/domain"
 	"mosaic/internal/observability"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -425,6 +426,28 @@ func startAPIServer(client *trading212.Client, service *application.PortfolioSer
 	if allowedOrigin == "" {
 		allowedOrigin = "http://localhost:5173"
 	}
+	importOwner := accountID
+	if demoMode {
+		importOwner = "mosaic-demo"
+	}
+	registerPortfolioCSV(mux, history, importOwner, allowedOrigin, func(ctx context.Context) (*domain.Portfolio, error) {
+		if demoMode {
+			return &demo.portfolio, nil
+		}
+		if data, fresh, found := cache.Get("portfolio"); fresh && found {
+			var p domain.Portfolio
+			if err := json.Unmarshal(data, &p); err == nil {
+				return &p, nil
+			}
+		}
+		p, err := service.Sync(ctx, accountID)
+		if err == nil {
+			if data, e := json.Marshal(p); e == nil {
+				cache.Set("portfolio", data)
+			}
+		}
+		return p, err
+	})
 
 	serveCachedJSON := func(
 		w http.ResponseWriter,

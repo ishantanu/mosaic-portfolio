@@ -18,4 +18,6 @@ export const endpoints = {
   transactions:   api('/api/transactions'),
   portfolio:      api('/api/portfolio'),
   portfolioHistory: api('/api/portfolio-history'),
+  portfolioExport: api('/api/portfolio/export'),
+  portfolioImports: api('/api/portfolio/imports'),
 };

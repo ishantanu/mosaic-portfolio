@@ -1,5 +1,5 @@
 import { html } from '../react.js';
-import { LayoutDashboard, Wallet, ChartNoAxesCombined, ListOrdered, Coins, Settings } from 'lucide-react';
+import { LayoutDashboard, Wallet, ChartNoAxesCombined, ListOrdered, Coins, Settings, ArrowLeftRight } from 'lucide-react';
 
 const NAV_ITEMS = [
   { hash: '#dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { hash: '#positions', label: 'Positions', icon: ChartNoAxesCombined },
   { hash: '#orders', label: 'Orders', icon: ListOrdered },
   { hash: '#dividends', label: 'Dividends', icon: Coins },
+  { hash: '#data', label: 'Import & export', icon: ArrowLeftRight },
   { hash: '#settings', label: 'Settings', icon: Settings },
 ];
 

@@ -86,6 +86,18 @@ func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 			return fmt.Errorf("record migration 001: %w", err)
 		}
 	}
+	var importsApplied bool
+	if err := tx.QueryRow(ctx, "SELECT EXISTS (SELECT 1 FROM schema_migrations WHERE version = 2)").Scan(&importsApplied); err != nil {
+		return fmt.Errorf("read imports migration: %w", err)
+	}
+	if !importsApplied {
+		if _, err := tx.Exec(ctx, importsSchema); err != nil {
+			return fmt.Errorf("apply migration 002: %w", err)
+		}
+		if _, err := tx.Exec(ctx, "INSERT INTO schema_migrations (version) VALUES (2)"); err != nil {
+			return err
+		}
+	}
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("commit database migration: %w", err)
 	}

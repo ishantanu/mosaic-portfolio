@@ -13,6 +13,7 @@ import PositionsView      from './views/PositionsView.js';
 import OrdersView         from './views/OrdersView.js';
 import DividendsView      from './views/DividendsView.js';
 import SettingsView       from './views/SettingsView.js';
+import DataTransferView from './views/DataTransferView.js';
 import NotFoundView       from './views/NotFoundView.js';
 
 // ── Route registry ────────────────────────────────────────────────────────────
@@ -23,6 +24,7 @@ const ROUTES = {
   '#orders':    { label: 'Orders',          component: OrdersView,         needsData: true  },
   '#dividends': { label: 'Dividends',       component: DividendsView,      needsData: true  },
   '#settings':  { label: 'Settings',        component: SettingsView,       needsData: false },
+  '#data': { label: 'Import & export', component: DataTransferView, needsData: false },
 };
 
 function getHash() {

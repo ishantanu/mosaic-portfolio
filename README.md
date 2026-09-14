@@ -10,10 +10,18 @@ investment advice.
 
 ## Demo preview
 
-![Mosaic dashboard in demo mode](docs/assets/mosaic-demo-dashboard.png)
+The redesigned shadcn/ui dashboard, shown with fictional demo data.
+
+### Light theme
+
+![Mosaic's redesigned portfolio dashboard in light theme with fictional demo data](docs/assets/mosaic-demo-dashboard.png)
+
+### Dark theme
+
+![Mosaic's redesigned portfolio dashboard in dark theme with fictional demo data](docs/assets/mosaic-demo-dashboard-dark.png)
 
 > **Demo figures only.** Every holding, value, return, cash balance, allowance
-> figure and broker split in this screenshot is fictional. Demo mode makes no
+> figure and broker split in these screenshots is fictional. Demo mode makes no
 > broker calls and must not be interpreted as real investment performance.
 
 ## What it does today
@@ -28,6 +36,38 @@ self-hosted observability stack covers API, database and browser telemetry.
 Trading 212 is the only live broker integration at present. The data model is
 designed to aggregate multiple brokers, but another connector is required before
 Interactive Brokers, Saxo, IG, or other providers can supply live data.
+
+## CSV export and import
+
+Open **Import & export** in the sidebar to download the latest available holdings
+as a Mosaic CSV. On this or another Mosaic instance, choose that file, review the
+validated preview, and select **Confirm import**. Previewing does not save data.
+
+Imported holdings are stored as separate PostgreSQL snapshots, visible on the
+same page, and can be exported again. They do not overwrite broker data or enter
+live dashboard totals. Reimporting an identical snapshot is a no-op, including
+when CSV rows or columns are reordered. A changed snapshot is saved separately.
+The page lists the most recent 100 imports; prices remain as of the snapshot date.
+
+- Supported format: Mosaic version 1 holdings CSV, UTF-8, comma-separated, with
+  the exported column names. Maximum 2 MiB and 10,000 holdings per import.
+- Includes broker/account identifiers, instrument details, quantities, prices,
+  cost/value figures, currencies, reported FX impact and cost ratios.
+- Excludes cash balances, transactions, orders, dividends, portfolio-value
+  history, settings and credentials. This is not a full-instance backup and does
+  not accept arbitrary broker transaction exports.
+- Numeric values use a decimal point without thousands separators. Text cells
+  that could execute spreadsheet formulas are escaped and restored by Mosaic.
+  Snapshot timestamps use UTC with microsecond precision to match PostgreSQL.
+- Downloads contain unmasked values and account identifiers even in privacy
+  mode. Keep exported files private. The importer follows Mosaic's self-hosted,
+  single-user trust model; do not expose the API publicly without access control.
+
+API routes: `GET /api/portfolio/export`, `POST /api/portfolio/imports/preview`,
+`POST /api/portfolio/imports`, and `GET /api/portfolio/imports`. POST bodies are
+raw CSV with `Content-Type: text/csv`. Use `?id=<snapshot-id>` on the imports GET
+to read a saved snapshot or on export to download it. Demo imports are isolated
+from live-account imports.
 
 ## Technology
 

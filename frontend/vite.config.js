@@ -9,7 +9,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: process.env.MOSAIC_API_URL ?? 'http://localhost:8081',
-        changeOrigin: true,
+        // Preserve the browser host so the API can verify same-origin CSV writes.
+        changeOrigin: false,
       },
     },
   },
